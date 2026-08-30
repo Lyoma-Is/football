@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Футбольный клуб Шуани</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a3d2e 0%, #1a5c40 50%, #0d4a30 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: #fff;
+      padding: 12px;
+    }
+    .container { width: 100%; max-width: 900px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 16px;
+      padding: 14px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 14px;
+      border: 2px solid #2ecc71;
+    }
+    #clubTitle {
+      font-size: clamp(1.25rem, 5.5vw, 2.2rem);
+      margin-bottom: 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      outline: none;
+      border: none;
+      background: transparent;
+      color: #fff;
+      text-align: center;
+      width: 100%;
+      font-weight: 700;
+      font-family: inherit;
+      border-radius: 8px;
+      padding: 4px 6px;
+    }
+    body:not(.admin) #clubTitle { pointer-events: none; cursor: default; }
+    body.admin #clubTitle { cursor: text; }
+    body.admin #clubTitle:hover { background: rgba(255,255,255,0.08); }
+    body.admin #clubTitle:focus {
+      background: rgba(255,255,255,0.12);
+      box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.5);
+    }
+    .subtitle { opacity: 0.85; font-size: 0.9rem; }
+
+    .controls {
+      display: none;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    body.admin .controls { display: flex; }
+
+    input[type="text"], input[type="password"], input[type="email"] {
+      flex: 1 1 140px;
+      min-width: 0;
+      padding: 12px 14px;
+      border: 2px solid #2ecc71;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+    }
+    input::placeholder { color: rgba(255,255,255,0.5); }
+    input:focus {
+      background: rgba(255,255,255,0.15);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+
+    .btn-add {
+      background: #2ecc71;
+      color: #0a3d2e;
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: #27ae60; }
+    .btn-save {
+      background: #f39c12;
+      color: #1a1a1a;
+      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      display: none;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+    }
+    body.admin .btn-save { display: block; }
+    .btn-save:hover { background: #e67e22; }
+
+    .table-wrapper {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 14px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 2px solid rgba(46, 204, 113, 0.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    thead { background: rgba(46, 204, 113, 0.25); }
+    th {
+      padding: 12px 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    th.th-num { width: 44px; text-align: center; }
+    th.th-name { width: auto; }
+    th.th-status { width: 150px; text-align: center; }
+    th.th-del { width: 40px; text-align: center; }
+    body:not(.admin) th.th-del { display: none; }
+
+    .status-title-input {
+      width: 140px;
+      max-width: 140px;
+      padding: 4px 6px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      text-align: center;
+      outline: none;
+    }
+    body:not(.admin) .status-title-input { pointer-events: none; border: none; }
+    body.admin .status-title-input { cursor: text; }
+    body.admin .status-title-input:hover { background: rgba(255,255,255,0.1); }
+    body.admin .status-title-input:focus {
+      background: rgba(255,255,255,0.15);
+      border-color: #2ecc71;
+    }
+    .status-title-text {
+      display: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    body:not(.admin) .status-title-text { display: inline; }
+    body:not(.admin) .status-title-input { display: none; }
+
+    td {
+      padding: 10px 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      vertical-align: middle;
+    }
+    td.td-num {
+      text-align: center;
+      font-weight: 600;
+      color: #2ecc71;
+      font-size: 0.9rem;
+    }
+    td.td-status, td.td-del { text-align: center; }
+    body:not(.admin) td.td-del { display: none; }
+
+    .name-cell {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    .name-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.95rem;
+    }
+    .name-edit-input {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      padding: 6px 8px;
+      border: 2px solid #2ecc71;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+    }
+    .edit-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.45);
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    body:not(.admin) .edit-btn { display: none !important; }
+    .edit-btn:hover { color: #2ecc71; background: rgba(46, 204, 113, 0.15); }
+
+    .status-input {
+      width: 44px;
+      height: 36px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      outline: none;
+    }
+    .status-input.plus {
+      background: #27ae60;
+      border-color: #2ecc71;
+      color: #fff;
+    }
+    .status-input.minus {
+      background: #c0392b;
+      border-color: #e74c3c;
+      color: #fff;
+    }
+    body.admin .status-input:focus {
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+    }
+
+    .status-badge {
+      display: none;
+      width: 44px;
+      height: 36px;
+      min-height: 36px;
+      margin: 0 auto;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    body:not(.admin) .status-input { display: none; }
+    body:not(.admin) .status-badge { display: inline-flex; }
+    .status-badge.plus { background: #27ae60; color: #fff; }
+    .status-badge.minus { background: #c0392b; color: #fff; }
+    .status-badge.empty {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.35);
+      height: 36px;
+      min-height: 36px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 16px;
+      opacity: 0.6;
+      font-size: 1rem;
+    }
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+    body:not(.admin) .delete-btn { display: none !important; }
+    .delete-btn:hover { color: #e74c3c; background: rgba(231, 76, 60, 0.15); }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .save-section {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .slider-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .slider-arrow {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid rgba(46, 204, 113, 0.5);
+      background: rgba(0,0,0,0.35);
+      color: #2ecc71;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .slider-arrow:hover {
+      background: rgba(46, 204, 113, 0.2);
+      border-color: #2ecc71;
+      transform: none;
+    }
+    .slider-arrow:disabled { opacity: 0.35; cursor: default; }
+    .slider-track {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 6px 0;
+    }
+    .slider-track::-webkit-scrollbar { display: none; }
+    .slider-inner {
+      display: flex;
+      gap: 8px;
+      width: max-content;
+      min-height: 40px;
+      align-items: center;
+    }
+    .period-btn {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 2px solid rgba(243, 156, 18, 0.5);
+      background: rgba(243, 156, 18, 0.15);
+      color: #f5d76e;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .period-btn:hover {
+      background: rgba(243, 156, 18, 0.3);
+      border-color: #f39c12;
+      transform: translateY(-2px);
+    }
+    .period-btn.active {
+      background: #f39c12;
+      border-color: #f39c12;
+      color: #1a1a1a;
+    }
+    .period-btn .period-del {
+      margin-left: 6px;
+      opacity: 0.6;
+      font-size: 0.85rem;
+    }
+    body:not(.admin) .period-btn .period-del { display: none; }
+    .period-btn .period-del:hover { opacity: 1; color: #c0392b; }
+    .slider-hint {
+      font-size: 0.8rem;
+      opacity: 0.55;
+      text-align: center;
+      padding: 0 8px;
+    }
+
+    .admin-bar {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .admin-link {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.45);
+      font-size: 0.8rem;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+    .admin-link:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.4);
+      transform: none;
+    }
+    body.admin .admin-link {
+      border-color: rgba(46, 204, 113, 0.5);
+      color: #2ecc71;
+    }
+
+    .sync-status {
+      display: none;
+    }
+    footer {
+      display: none;
+    }
+
+    #toastContainer {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      width: min(400px, calc(100% - 24px));
+    }
+    .toast {
+      pointer-events: auto;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+      animation: toastIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.hide { animation: toastOut 0.25s ease forwards; }
+    .toast.info { background: #1e3a5f; border: 1px solid #3b82f6; color: #dbeafe; }
+    .toast.success { background: #14532d; border: 1px solid #22c55e; color: #dcfce7; }
+    .toast.warn { background: #713f12; border: 1px solid #f59e0b; color: #fef3c7; }
+    .toast.error { background: #7f1d1d; border: 1px solid #ef4444; color: #fecaca; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-12px); }
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .overlay.show { display: flex; }
+    .modal-box {
+      background: #0f2a1f;
+      border: 2px solid rgba(46, 204, 113, 0.45);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    .modal-box p {
+      font-size: 1rem;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .modal-box input { width: 100%; margin-bottom: 14px; }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .modal-actions button { min-width: 90px; flex: 1; }
+    .btn-confirm-yes { background: #e74c3c; color: #fff; }
+    .btn-confirm-yes:hover { background: #c0392b; }
+    .btn-ok { background: #2ecc71; color: #0a3d2e; }
+    .btn-ok:hover { background: #27ae60; }
+    .btn-confirm-no {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-confirm-no:hover { background: rgba(255,255,255,0.2); }
+
+    .name-actions {
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-top: 10px;
+      width: 100%;
+      flex-wrap: nowrap;
+    }
+
+    @media (max-width: 450px) {
+      body { padding: 8px; }
+      header {
+        padding: 12px 10px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+      }
+      .controls { flex-direction: column; gap: 8px; margin-bottom: 12px; }
+      .controls input[type="text"] { width: 100%; flex: none; }
+      .btn-add { width: 100%; }
+      table { table-layout: auto; }
+      th { padding: 10px 6px; font-size: 0.8rem; }
+      th.th-num { width: 36px; }
+      body.admin th.th-status,
+      body.admin th.th-del { display: none; }
+      body.admin td.td-status,
+      body.admin td.td-del { display: none; }
+      body:not(.admin) th.th-status { width: 56px; }
+      body:not(.admin) td.td-status { width: 56px; }
+      td { padding: 10px 6px; }
+      .name-text {
+        font-size: 0.95rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+      }
+      body.admin .name-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        width: 100%;
+      }
+      body.admin .name-cell > .edit-btn { display: none !important; }
+      body.admin .name-actions {
+        display: flex !important;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        margin-top: 10px;
+        width: 100%;
+      }
+      body.admin .name-actions .edit-btn {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+        color: rgba(255,255,255,0.85);
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+      }
+      body.admin .name-actions .delete-btn {
+        font-size: 1.1rem;
+        padding: 8px 12px;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+      }
+      .status-input, .status-badge {
+        width: 44px;
+        height: 36px;
+        font-size: 1.15rem;
+      }
+      .slider-arrow { width: 36px; height: 36px; font-size: 1rem; }
+      .period-btn { padding: 8px 12px; font-size: 0.85rem; }
+      .btn-save { padding: 12px 16px; font-size: 1rem; }
+      .save-section { margin-top: 16px; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toastContainer"></div>
+
+  <div id="confirmOverlay" class="overlay">
+    <div class="modal-box">
+      <p id="confirmText"></p>
+      <div class="modal-actions">
+        <button class="btn-confirm-no" id="confirmNo">Отмена</button>
+        <button class="btn-confirm-yes" id="confirmYes">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loginOverlay" class="overlay">
+    <div class="modal-box">
+      <p>Вход для администратора</p>
+      <input type="email" id="adminLogin" placeholder="Email" maxlength="80" autocomplete="username">
+      <input type="password" id="adminPassword" placeholder="Пароль" maxlength="80" autocomplete="current-password">
+      <div class="modal-actions">
+        <button class="btn-confirm-no" id="loginCancel">Отмена</button>
+        <button class="btn-ok" id="loginOk">Войти</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <input type="text" id="clubTitle" value="⚽ Футбольный клуб Шуани" maxlength="60" spellcheck="false">
+      <p class="subtitle">Список игроков команды</p>
+    </header>
+
+    <div class="controls">
+      <input type="text" id="playerName" placeholder="Введите ФИО игрока..." maxlength="80">
+      <button class="btn-add" onclick="addPlayer()">➕ Добавить игрока</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="playerList"></tbody>
+      </table>
+      <div id="emptyMessage" class="empty">Подключение к Firebase...</div>
+    </div>
+
+    <div class="save-section">
+      <button class="btn-save" id="saveBtn" onclick="savePeriod(true)">💾 Сохранить</button>
+      <div class="slider-wrap">
+        <button class="slider-arrow" id="sliderLeft" onclick="scrollSlider(-1)" title="Назад">◀</button>
+        <div class="slider-track" id="sliderTrack">
+          <div class="slider-inner" id="sliderInner"></div>
+        </div>
+        <button class="slider-arrow" id="sliderRight" onclick="scrollSlider(1)" title="Вперёд">▶</button>
+      </div>
+      <p class="slider-hint" id="sliderHint">Сохранённые периоды появятся здесь</p>
+    </div>
+
+    <div class="admin-bar">
+      <button class="admin-link" id="adminBtn" onclick="toggleAdmin()"></button>
+      <div class="sync-status" id="syncStatus">Подключение...</div>
+    </div>
+
+    <footer id="footerText">Режим просмотра</footer>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxyXhe2NJ0DlzaPAJWw2hpB1MI0fMPRQ4",
+      authDomain: "footbool-144c5.firebaseapp.com",
+      databaseURL: "https://footbool-144c5-default-rtdb.firebaseio.com",
+      projectId: "footbool-144c5",
+      storageBucket: "footbool-144c5.firebasestorage.app",
+      messagingSenderId: "526579285005",
+      appId: "1:526579285005:web:a488fe3588cebcff682944"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const dataRef = ref(db, "content");
+
+    let players = [];
+    let statusTitle = "+ / −";
+    let periods = [];
+    let activePeriodId = null;
+    let clubTitleValue = "⚽ Футбольный клуб Шуани";
+    let isAdmin = false;
+    let confirmCallback = null;
+    let saveTimer = null;
+    let applyingRemote = false;
+    let ready = false;
+    let firebaseUser = null;
+
+    function uid() {
+      return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+
+    function getState() {
+      return {
+        clubTitle: clubTitleValue,
+        statusTitle,
+        players,
+        periods,
+        activePeriodId: activePeriodId || null
+      };
+    }
+
+    function applyState(data) {
+      if (!data || typeof data !== "object") {
+        players = [];
+        periods = [];
+        statusTitle = "+ / −";
+        activePeriodId = null;
+        return;
+      }
+      clubTitleValue = data.clubTitle || "⚽ Футбольный клуб Шуани";
+      statusTitle = data.statusTitle || "+ / −";
+      players = Array.isArray(data.players)
+        ? data.players.map((p) => ({
+            id: p.id || uid(),
+            name: p.name || "",
+            status: p.status || ""
+          }))
+        : [];
+      periods = Array.isArray(data.periods) ? data.periods : [];
+      activePeriodId = data.activePeriodId || null;
+
+      const titleInput = document.getElementById("clubTitle");
+      titleInput.value = clubTitleValue;
+      document.title = clubTitleValue.replace(/^⚽\s*/, "") || "Футбольный клуб";
+    }
+
+    function setSyncStatus(text, cls) {
+      const el = document.getElementById("syncStatus");
+      el.textContent = text;
+      el.className = "sync-status" + (cls ? " " + cls : "");
+    }
+
+    function scheduleSave() {
+      if (!isAdmin || !ready) return;
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        try {
+          applyingRemote = true;
+          await set(dataRef, getState());
+          setSyncStatus("Сохранено в Firebase", "ok");
+        } catch (e) {
+          setSyncStatus("Ошибка записи — проверьте Rules", "err");
+          showToast("Нет доступа на запись в Firebase", "error");
+          console.warn(e);
+        } finally {
+          setTimeout(() => {
+            applyingRemote = false;
+          }, 300);
+        }
+      }, 350);
+    }
+
+    onValue(
+      dataRef,
+      (snapshot) => {
+        if (applyingRemote && isAdmin) return;
+        applyState(snapshot.val());
+        sortPlayers();
+        ready = true;
+        render();
+        /* status hidden */
+      },
+      (err) => {
+        ready = true;
+        setSyncStatus("Нет чтения — настройте Rules", "err");
+        showToast("Нет доступа к базе. Откройте Rules (read)", "error");
+        console.warn(err);
+        render();
+      }
+    );
+
+    onAuthStateChanged(auth, (user) => {
+      firebaseUser = user;
+      if (user) {
+        isAdmin = true;
+        applyAdminMode();
+        render();
+        /* status hidden */
+      }
+    });
+
+    function applyAdminMode() {
+      document.body.classList.toggle("admin", isAdmin);
+      const btn = document.getElementById("adminBtn");
+      if (isAdmin) {
+        btn.textContent = "Выйти из админ-режима";
+      } else {
+        btn.textContent = "Вход для администратора";
+      }
+    }
+
+    window.toggleAdmin = async function () {
+      if (isAdmin) {
+        try {
+          await signOut(auth);
+        } catch (_) {}
+        isAdmin = false;
+        firebaseUser = null;
+        applyAdminMode();
+        render();
+        showToast("Вы вышли из режима администратора", "info");
+      } else {
+        document.getElementById("adminLogin").value = "";
+        document.getElementById("adminPassword").value = "";
+        document.getElementById("loginOverlay").classList.add("show");
+        setTimeout(() => document.getElementById("adminLogin").focus(), 100);
+      }
+    };
+
+    async function tryLogin() {
+      const login = document.getElementById("adminLogin").value.trim();
+      const pass = document.getElementById("adminPassword").value;
+      if (!login || !pass) {
+        showToast("Введите email и пароль", "warn");
+        return;
+      }
+
+      // Вход только через Firebase Auth — никаких локальных запасных паролей в клиентском коде
+      try {
+        const cred = await signInWithEmailAndPassword(auth, login, pass);
+        isAdmin = true;
+        firebaseUser = cred.user;
+        document.getElementById("loginOverlay").classList.remove("show");
+        applyAdminMode();
+        render();
+        showToast("Вход выполнен", "success");
+        return;
+      } catch (e) {
+        console.warn("Firebase Auth:", e.code || e.message);
+      }
+
+      showToast("Неверный email или пароль", "error");
+      document.getElementById("adminPassword").value = "";
+      document.getElementById("adminLogin").focus();
+    }
+
+    document.getElementById("loginOk").onclick = () => tryLogin();
+    document.getElementById("loginCancel").onclick = () => {
+      document.getElementById("loginOverlay").classList.remove("show");
+    };
+    document.getElementById("adminLogin").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("adminPassword").focus();
+    });
+    document.getElementById("adminPassword").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") tryLogin();
+    });
+    document.getElementById("loginOverlay").addEventListener("click", (e) => {
+      if (e.target.id === "loginOverlay") {
+        document.getElementById("loginOverlay").classList.remove("show");
+      }
+    });
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const el = document.createElement("div");
+      el.className = "toast " + type;
+      const icons = { info: "ℹ️", success: "✅", warn: "⚠️", error: "❌" };
+      const iconSpan = document.createElement("span");
+      iconSpan.textContent = icons[type] || "";
+      const msgSpan = document.createElement("span");
+      msgSpan.textContent = message;
+      el.appendChild(iconSpan);
+      el.appendChild(msgSpan);
+      container.appendChild(el);
+      setTimeout(() => {
+        el.classList.add("hide");
+        setTimeout(() => el.remove(), 250);
+      }, 3200);
+    }
+
+    function showConfirm(message, onYes) {
+      document.getElementById("confirmText").textContent = message;
+      confirmCallback = onYes;
+      document.getElementById("confirmOverlay").classList.add("show");
+    }
+    document.getElementById("confirmYes").onclick = () => {
+      document.getElementById("confirmOverlay").classList.remove("show");
+      if (confirmCallback) confirmCallback();
+      confirmCallback = null;
+    };
+    document.getElementById("confirmNo").onclick = () => {
+      document.getElementById("confirmOverlay").classList.remove("show");
+      confirmCallback = null;
+    };
+    document.getElementById("confirmOverlay").addEventListener("click", (e) => {
+      if (e.target.id === "confirmOverlay") {
+        document.getElementById("confirmOverlay").classList.remove("show");
+        confirmCallback = null;
+      }
+    });
+
+    const titleInput = document.getElementById("clubTitle");
+    titleInput.addEventListener("input", () => {
+      if (!isAdmin) return;
+      clubTitleValue = titleInput.value;
+      document.title = clubTitleValue.replace(/^⚽\s*/, "") || "Футбольный клуб";
+      scheduleSave();
+    });
+    titleInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") titleInput.blur();
+    });
+
+    function sortPlayers() {
+      players.sort((a, b) =>
+        a.name.localeCompare(b.name, "ru", { sensitivity: "base" })
+      );
+    }
+
+    function isDefaultTitle(t) {
+      const s = (t || "").trim();
+      return !s || s === "+ / −" || s === "+/-" || s === "+/−";
+    }
+
+    function snapshotCurrent() {
+      const title = (statusTitle || "").trim();
+      if (isDefaultTitle(title) || players.length === 0) return null;
+      const statuses = {};
+      players.forEach((p) => {
+        statuses[p.id] = p.status || "";
+      });
+      const existing = periods.find((pr) => pr.title === title);
+      if (existing) {
+        existing.statuses = statuses;
+        return existing.id;
+      }
+      const period = { id: uid(), title, statuses };
+      periods.push(period);
+      return period.id;
+    }
+
+    function renderHead() {
+      const tr = document.getElementById("tableHead");
+      tr.innerHTML = "";
+
+      const thNum = document.createElement("th");
+      thNum.className = "th-num";
+      thNum.textContent = "№";
+      tr.appendChild(thNum);
+
+      const thName = document.createElement("th");
+      thName.className = "th-name";
+      thName.textContent = "ФИО";
+      tr.appendChild(thName);
+
+      const thStatus = document.createElement("th");
+      thStatus.className = "th-status";
+      const statusTitleInput = document.createElement("input");
+      statusTitleInput.type = "text";
+      statusTitleInput.className = "status-title-input";
+      statusTitleInput.value = statusTitle;
+      statusTitleInput.maxLength = 30;
+      statusTitleInput.placeholder = "+ / −";
+      statusTitleInput.readOnly = !isAdmin;
+      statusTitleInput.addEventListener("input", () => {
+        if (!isAdmin) return;
+        statusTitle = statusTitleInput.value;
+        activePeriodId = null;
+        scheduleSave();
+        renderPeriods();
+      });
+      statusTitleInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") statusTitleInput.blur();
+      });
+      const statusTitleText = document.createElement("span");
+      statusTitleText.className = "status-title-text";
+      statusTitleText.textContent = isDefaultTitle(statusTitle)
+        ? "+ / −"
+        : statusTitle;
+      thStatus.appendChild(statusTitleInput);
+      thStatus.appendChild(statusTitleText);
+      tr.appendChild(thStatus);
+
+      if (isAdmin) {
+        const thDel = document.createElement("th");
+        thDel.className = "th-del";
+        thDel.textContent = "";
+        tr.appendChild(thDel);
+      }
+    }
+
+    function render() {
+      renderHead();
+      const tbody = document.getElementById("playerList");
+      const empty = document.getElementById("emptyMessage");
+      tbody.innerHTML = "";
+
+      if (players.length === 0) {
+        empty.style.display = "block";
+        empty.textContent = isAdmin
+          ? "Пока нет игроков. Добавьте первого!"
+          : "Пока нет игроков";
+      } else {
+        empty.style.display = "none";
+      }
+
+      players.forEach((p, i) => {
+        const tr = document.createElement("tr");
+
+        const tdNum = document.createElement("td");
+        tdNum.className = "td-num";
+        tdNum.textContent = i + 1;
+        tr.appendChild(tdNum);
+
+        const tdName = document.createElement("td");
+        const nameCell = document.createElement("div");
+        nameCell.className = "name-cell";
+        const nameText = document.createElement("span");
+        nameText.className = "name-text";
+        nameText.textContent = p.name;
+        nameCell.appendChild(nameText);
+
+        if (isAdmin) {
+          const editBtn = document.createElement("button");
+          editBtn.className = "edit-btn";
+          editBtn.innerHTML = "✏️";
+          editBtn.title = "Изменить имя";
+          editBtn.onclick = () => startEdit(p, nameCell, nameText, editBtn);
+          nameCell.appendChild(editBtn);
+
+          const actions = document.createElement("div");
+          actions.className = "name-actions";
+
+          const editBtnM = document.createElement("button");
+          editBtnM.className = "edit-btn";
+          editBtnM.innerHTML = "✏️";
+          editBtnM.title = "Изменить имя";
+          editBtnM.onclick = () => startEdit(p, nameCell, nameText, editBtn);
+          actions.appendChild(editBtnM);
+
+          const statusInputM = document.createElement("input");
+          statusInputM.type = "text";
+          statusInputM.className = "status-input";
+          statusInputM.maxLength = 1;
+          statusInputM.value = p.status || "";
+          updateStatusClass(statusInputM);
+          bindStatusInput(statusInputM, p);
+          actions.appendChild(statusInputM);
+
+          const delBtnM = document.createElement("button");
+          delBtnM.className = "delete-btn";
+          delBtnM.innerHTML = "✕";
+          delBtnM.title = "Удалить";
+          delBtnM.onclick = () => {
+            players.splice(i, 1);
+            scheduleSave();
+            render();
+          };
+          actions.appendChild(delBtnM);
+          nameCell.appendChild(actions);
+        }
+
+        tdName.appendChild(nameCell);
+        tr.appendChild(tdName);
+
+        const tdStatus = document.createElement("td");
+        tdStatus.className = "td-status";
+
+        if (isAdmin) {
+          const statusInput = document.createElement("input");
+          statusInput.type = "text";
+          statusInput.className = "status-input";
+          statusInput.maxLength = 1;
+          statusInput.value = p.status || "";
+          updateStatusClass(statusInput);
+          bindStatusInput(statusInput, p);
+          tdStatus.appendChild(statusInput);
+        } else {
+          const badge = document.createElement("span");
+          badge.className = "status-badge";
+          if (p.status === "+") {
+            badge.classList.add("plus");
+            badge.textContent = "+";
+          } else if (p.status === "-") {
+            badge.classList.add("minus");
+            badge.textContent = "−";
+          } else {
+            badge.classList.add("empty");
+            badge.textContent = "";
+          }
+          tdStatus.appendChild(badge);
+        }
+        tr.appendChild(tdStatus);
+
+        if (isAdmin) {
+          const tdDel = document.createElement("td");
+          tdDel.className = "td-del";
+          const delBtn = document.createElement("button");
+          delBtn.className = "delete-btn";
+          delBtn.innerHTML = "✕";
+          delBtn.title = "Удалить";
+          delBtn.onclick = () => {
+            players.splice(i, 1);
+            scheduleSave();
+            render();
+          };
+          tdDel.appendChild(delBtn);
+          tr.appendChild(tdDel);
+        }
+
+        tbody.appendChild(tr);
+      });
+
+      renderPeriods();
+    }
+
+    function renderPeriods() {
+      const inner = document.getElementById("sliderInner");
+      const hint = document.getElementById("sliderHint");
+      inner.innerHTML = "";
+
+      if (periods.length === 0) {
+        hint.style.display = "block";
+        hint.textContent = isAdmin
+          ? "Сохранённые периоды появятся здесь"
+          : "Нет сохранённых периодов";
+      } else {
+        hint.style.display = "none";
+      }
+
+      periods.forEach((period, idx) => {
+        const btn = document.createElement("button");
+        btn.className =
+          "period-btn" + (period.id === activePeriodId ? " active" : "");
+        const titleSpan = document.createElement("span");
+        titleSpan.textContent = period.title;
+        btn.appendChild(titleSpan);
+        if (isAdmin) {
+          const delSpan = document.createElement("span");
+          delSpan.className = "period-del";
+          delSpan.title = "Удалить период";
+          delSpan.textContent = " ✕";
+          btn.appendChild(delSpan);
+        }
+        btn.onclick = (e) => {
+          if (isAdmin && e.target.classList.contains("period-del")) {
+            e.stopPropagation();
+            showConfirm("Удалить период «" + period.title + "»?", () => {
+              periods.splice(idx, 1);
+              if (activePeriodId === period.id) activePeriodId = null;
+              scheduleSave();
+              renderPeriods();
+              showToast("Период удалён", "info");
+            });
+            return;
+          }
+          loadPeriod(period.id);
+        };
+        inner.appendChild(btn);
+      });
+      updateSliderArrows();
+    }
+
+    window.scrollSlider = function (dir) {
+      const track = document.getElementById("sliderTrack");
+      track.scrollBy({ left: dir * 160, behavior: "smooth" });
+      setTimeout(updateSliderArrows, 300);
+    };
+
+    function updateSliderArrows() {
+      const track = document.getElementById("sliderTrack");
+      const left = document.getElementById("sliderLeft");
+      const right = document.getElementById("sliderRight");
+      left.disabled = track.scrollLeft <= 2;
+      right.disabled =
+        track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+    }
+    document
+      .getElementById("sliderTrack")
+      .addEventListener("scroll", updateSliderArrows);
+
+    window.savePeriod = function (clearAfter) {
+      if (!isAdmin) return;
+      const title = (statusTitle || "").trim();
+      if (isDefaultTitle(title)) {
+        showToast(
+          "Введите название периода (например: Октябрь 2026)",
+          "warn"
+        );
+        return;
+      }
+      if (players.length === 0) {
+        showToast("Нет игроков для сохранения", "warn");
+        return;
+      }
+      const id = snapshotCurrent();
+      if (!id) return;
+      if (clearAfter) {
+        statusTitle = "+ / −";
+        players.forEach((p) => {
+          p.status = "";
+        });
+        activePeriodId = null;
+        showToast("Период «" + title + "» сохранён", "success");
+      } else {
+        activePeriodId = id;
+      }
+      scheduleSave();
+      render();
+    };
+
+    function loadPeriod(periodId) {
+      const period = periods.find((p) => p.id === periodId);
+      if (!period) return;
+      if (period.id === activePeriodId) return;
+
+      if (isAdmin) {
+        const currentTitle = (statusTitle || "").trim();
+        if (!isDefaultTitle(currentTitle) && currentTitle !== period.title) {
+          snapshotCurrent();
+        }
+      }
+
+      statusTitle = period.title;
+      players.forEach((p) => {
+        p.status =
+          period.statuses && period.statuses[p.id] !== undefined
+            ? period.statuses[p.id]
+            : "";
+      });
+      activePeriodId = periodId;
+      if (isAdmin) scheduleSave();
+      render();
+      showToast("Открыт период «" + period.title + "»", "info");
+    }
+
+    function startEdit(player, nameCell, nameText, editBtn) {
+      if (!isAdmin) return;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "name-edit-input";
+      input.value = player.name;
+      input.maxLength = 80;
+      nameCell.replaceChild(input, nameText);
+      if (editBtn) editBtn.style.display = "none";
+      input.focus();
+      input.select();
+      const finish = () => {
+        const newName = input.value.trim();
+        if (newName && newName !== player.name) {
+          player.name = newName;
+          sortPlayers();
+          scheduleSave();
+          render();
+        } else {
+          nameCell.replaceChild(nameText, input);
+          if (editBtn) editBtn.style.display = "";
+        }
+      };
+      input.addEventListener("blur", finish);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          input.blur();
+        }
+        if (e.key === "Escape") {
+          input.value = player.name;
+          input.blur();
+        }
+      });
+    }
+
+    function bindStatusInput(input, p) {
+      input.addEventListener("input", (e) => {
+        if (!isAdmin) return;
+        let v = e.target.value.trim();
+        if (v !== "+" && v !== "-") {
+          v =
+            v === ""
+              ? ""
+              : v.includes("+")
+                ? "+"
+                : v.includes("-")
+                  ? "-"
+                  : "";
+          e.target.value = v;
+        }
+        p.status = v;
+        updateStatusClass(e.target);
+        activePeriodId = null;
+        scheduleSave();
+        renderPeriods();
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") e.target.blur();
+      });
+    }
+
+    function updateStatusClass(input) {
+      input.classList.remove("plus", "minus");
+      if (input.value === "+") input.classList.add("plus");
+      else if (input.value === "-") input.classList.add("minus");
+    }
+
+    window.addPlayer = function () {
+      if (!isAdmin) return;
+      const input = document.getElementById("playerName");
+      const name = input.value.trim();
+      if (!name) {
+        input.focus();
+        return;
+      }
+      players.push({ id: uid(), name, status: "" });
+      sortPlayers();
+      input.value = "";
+      scheduleSave();
+      render();
+      input.focus();
+    };
+
+    document.getElementById("playerName").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") window.addPlayer();
+    });
+
+    applyAdminMode();
+  </script>
+</body>
+</html>
