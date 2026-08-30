@@ -503,6 +503,8 @@
       flex-wrap: nowrap;
     }
 
+    .period-title-mobile-input { display: none; }
+
     @media (max-width: 450px) {
       body { padding: 8px; }
       header {
@@ -522,6 +524,20 @@
       body.admin td.td-del { display: none; }
       body:not(.admin) th.th-status { width: 56px; }
       body:not(.admin) td.td-status { width: 56px; }
+      body.admin .period-title-mobile-input {
+        display: block;
+        width: 100%;
+        max-width: 320px;
+        max-height: 50px;
+        margin: 0 auto;
+        padding: 10px 14px;
+        border: 2px solid #2ecc71;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-size: 16px;
+        text-align: center;
+      }
       td { padding: 10px 6px; }
       .name-text {
         font-size: 0.95rem;
@@ -617,6 +633,7 @@
     </div>
 
     <div class="save-section">
+      <input type="text" id="periodTitleMobile" class="period-title-mobile-input" placeholder="+ / −" maxlength="30" autocomplete="off">
       <button class="btn-save" id="saveBtn" onclick="savePeriod(true)">💾 Сохранить</button>
       <div class="slider-wrap">
         <button class="slider-arrow" id="sliderLeft" onclick="scrollSlider(-1)" title="Назад">◀</button>
@@ -888,6 +905,20 @@
       if (e.key === "Enter") titleInput.blur();
     });
 
+    const periodTitleMobileInput = document.getElementById("periodTitleMobile");
+    periodTitleMobileInput.addEventListener("input", () => {
+      if (!isAdmin) return;
+      statusTitle = periodTitleMobileInput.value;
+      activePeriodId = null;
+      const desktopInput = document.querySelector(".status-title-input");
+      if (desktopInput) desktopInput.value = statusTitle;
+      scheduleSave();
+      renderPeriods();
+    });
+    periodTitleMobileInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") periodTitleMobileInput.blur();
+    });
+
     function sortPlayers() {
       players.sort((a, b) =>
         a.name.localeCompare(b.name, "ru", { sensitivity: "base" })
@@ -957,6 +988,11 @@
       thStatus.appendChild(statusTitleInput);
       thStatus.appendChild(statusTitleText);
       tr.appendChild(thStatus);
+
+      const periodTitleMobileInput = document.getElementById("periodTitleMobile");
+      if (periodTitleMobileInput && document.activeElement !== periodTitleMobileInput) {
+        periodTitleMobileInput.value = statusTitle;
+      }
 
       if (isAdmin) {
         const thDel = document.createElement("th");
