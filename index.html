@@ -227,13 +227,24 @@
       width: 44px;
       height: 36px;
       text-align: center;
+      text-align-last: center;
       font-size: 1.2rem;
       font-weight: 700;
+      font-family: inherit;
       border: 2px solid rgba(255,255,255,0.3);
       border-radius: 8px;
       background: rgba(255,255,255,0.1);
       color: #fff;
       outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      padding: 0 2px;
+    }
+    .status-input option {
+      color: #000;
+      font-weight: 700;
     }
     .status-input.plus {
       background: #27ae60;
@@ -499,8 +510,9 @@
       justify-content: flex-start;
       gap: 12px;
       margin-top: 10px;
-      width: 100%;
+      min-width: 40%;
       flex-wrap: nowrap;
+
     }
 
     .period-title-mobile-input { display: none; }
@@ -556,9 +568,11 @@
         display: flex !important;
         flex-direction: row;
         align-items: center;
+        align-self: flex-end;
         gap: 12px;
         margin-top: 10px;
-        width: 40%;
+        min-width: 40%;
+        justify-content: end;
       }
       body.admin .name-actions .edit-btn {
         font-size: 1.05rem;
@@ -633,7 +647,7 @@
     </div>
 
     <div class="save-section">
-      <input type="text" id="periodTitleMobile" class="period-title-mobile-input" placeholder="+ / −" maxlength="30" autocomplete="off">
+      <input type="text" id="periodTitleMobile" class="period-title-mobile-input" placeholder="Месяц Год" maxlength="30" autocomplete="off">
       <button class="btn-save" id="saveBtn" onclick="savePeriod(true)">💾 Сохранить</button>
       <div class="slider-wrap">
         <button class="slider-arrow" id="sliderLeft" onclick="scrollSlider(-1)" title="Назад">◀</button>
@@ -679,7 +693,7 @@
     const dataRef = ref(db, "content");
 
     let players = [];
-    let statusTitle = "+ / −";
+    let statusTitle = "";
     let periods = [];
     let activePeriodId = null;
     let clubTitleValue = "⚽ Футбольный клуб Шуани";
@@ -708,12 +722,12 @@
       if (!data || typeof data !== "object") {
         players = [];
         periods = [];
-        statusTitle = "+ / −";
+        statusTitle = "";
         activePeriodId = null;
         return;
       }
       clubTitleValue = data.clubTitle || "⚽ Футбольный клуб Шуани";
-      statusTitle = data.statusTitle || "+ / −";
+      statusTitle = data.statusTitle || "";
       players = Array.isArray(data.players)
         ? data.players.map((p) => ({
             id: p.id || uid(),
@@ -968,7 +982,7 @@
       statusTitleInput.className = "status-title-input";
       statusTitleInput.value = statusTitle;
       statusTitleInput.maxLength = 30;
-      statusTitleInput.placeholder = "+ / −";
+      statusTitleInput.placeholder = "Месяц Год";
       statusTitleInput.readOnly = !isAdmin;
       statusTitleInput.addEventListener("input", () => {
         if (!isAdmin) return;
@@ -1051,13 +1065,7 @@
           editBtnM.onclick = () => startEdit(p, nameCell, nameText, editBtn);
           actions.appendChild(editBtnM);
 
-          const statusInputM = document.createElement("input");
-          statusInputM.type = "text";
-          statusInputM.className = "status-input";
-          statusInputM.maxLength = 1;
-          statusInputM.value = p.status || "";
-          updateStatusClass(statusInputM);
-          bindStatusInput(statusInputM, p);
+          const statusInputM = createStatusSelect(p);
           actions.appendChild(statusInputM);
 
           const delBtnM = document.createElement("button");
@@ -1080,13 +1088,7 @@
         tdStatus.className = "td-status";
 
         if (isAdmin) {
-          const statusInput = document.createElement("input");
-          statusInput.type = "text";
-          statusInput.className = "status-input";
-          statusInput.maxLength = 1;
-          statusInput.value = p.status || "";
-          updateStatusClass(statusInput);
-          bindStatusInput(statusInput, p);
+          const statusInput = createStatusSelect(p);
           tdStatus.appendChild(statusInput);
         } else {
           const badge = document.createElement("span");
@@ -1209,7 +1211,7 @@
       const id = snapshotCurrent();
       if (!id) return;
       if (clearAfter) {
-        statusTitle = "+ / −";
+        statusTitle = "";
         players.forEach((p) => {
           p.status = "";
         });
@@ -1283,29 +1285,35 @@
       });
     }
 
-    function bindStatusInput(input, p) {
-      input.addEventListener("input", (e) => {
+    function createStatusSelect(p) {
+      const select = document.createElement("select");
+      select.className = "status-input";
+      const options = [
+        { value: "", label: "—" },
+        { value: "+", label: "+" },
+        { value: "-", label: "−" }
+      ];
+      options.forEach((o) => {
+        const opt = document.createElement("option");
+        opt.value = o.value;
+        opt.textContent = o.label;
+        select.appendChild(opt);
+      });
+      select.value = p.status || "";
+      updateStatusClass(select);
+      bindStatusInput(select, p);
+      return select;
+    }
+
+    function bindStatusInput(select, p) {
+      select.addEventListener("change", (e) => {
         if (!isAdmin) return;
-        let v = e.target.value.trim();
-        if (v !== "+" && v !== "-") {
-          v =
-            v === ""
-              ? ""
-              : v.includes("+")
-                ? "+"
-                : v.includes("-")
-                  ? "-"
-                  : "";
-          e.target.value = v;
-        }
+        const v = e.target.value === "+" || e.target.value === "-" ? e.target.value : "";
         p.status = v;
         updateStatusClass(e.target);
         activePeriodId = null;
         scheduleSave();
         renderPeriods();
-      });
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") e.target.blur();
       });
     }
 
