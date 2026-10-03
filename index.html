@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1200">
+  <meta name="viewport" content="width=800">
   <meta name="theme-color" content="#eaf2ff">
   <title>Футбольный клуб Шуани</title>
   <style>
@@ -36,7 +36,7 @@
       color: var(--text);
       padding: 12px;
     }
-    .container { width: 100%; max-width: 1200px; margin: 0 auto; }
+    .container { width: 100%; max-width: 800px; margin: 0 auto; }
 
     header {
       text-align: center;
@@ -243,7 +243,7 @@
       font-size: 0.9rem;
     }
     td.td-status, td.td-del { text-align: center; }
-    td.td-status { border-left: 1px solid #e3ecfb; }
+    td.td-status { border-left: 1px solid #e3ecfb; padding-left: 4px; padding-right: 4px; }
     body:not(.admin) td.td-del { display: none; }
 
     .name-cell {
@@ -257,7 +257,7 @@
       min-width: 0;
       white-space: normal;
       overflow-wrap: anywhere;
-      font-size: 0.95rem;
+      font-size: 1.2rem;
     }
     .name-edit-input {
       flex: 1;
@@ -997,8 +997,8 @@
         cg.appendChild(col);
       };
       addCol(44); // №
-      addCol(0); // ФИО — всё оставшееся место
-      const colW = colCount > 8 ? 64 : 76;
+      addCol(200); // ФИО
+      const colW = colCount <= 6 ? 76 : colCount <= 8 ? 60 : 52;
       for (let c = 0; c < colCount; c++) addCol(colW);
       if (isAdmin) addCol(40); // удаление
 
