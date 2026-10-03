@@ -1107,6 +1107,18 @@
       }
     }
 
+    function confirmDeletePlayer(p) {
+      if (!isAdmin) return;
+      showConfirm("Вы действительно хотите удалить игрока «" + p.name + "»?", () => {
+        const idx = players.findIndex((x) => x.id === p.id);
+        if (idx === -1) return;
+        players.splice(idx, 1);
+        scheduleSave();
+        render();
+        showToast("Игрок удалён", "info");
+      });
+    }
+
     function render() {
       renderHead();
       const tbody = document.getElementById("playerList");
@@ -1160,11 +1172,7 @@
           delBtnM.className = "delete-btn";
           delBtnM.innerHTML = "✕";
           delBtnM.title = "Удалить";
-          delBtnM.onclick = () => {
-            players.splice(i, 1);
-            scheduleSave();
-            render();
-          };
+          delBtnM.onclick = () => confirmDeletePlayer(p);
           actions.appendChild(delBtnM);
           nameCell.appendChild(actions);
         }
@@ -1195,11 +1203,7 @@
           delBtn.className = "delete-btn";
           delBtn.innerHTML = "✕";
           delBtn.title = "Удалить";
-          delBtn.onclick = () => {
-            players.splice(i, 1);
-            scheduleSave();
-            render();
-          };
+          delBtn.onclick = () => confirmDeletePlayer(p);
           tdDel.appendChild(delBtn);
           tr.appendChild(tdDel);
         }
