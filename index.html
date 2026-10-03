@@ -611,7 +611,6 @@
   <div class="container">
     <header>
       <input type="text" id="clubTitle" value="⚽ Футбольный клуб Шуани" maxlength="60" spellcheck="false">
-      <p class="subtitle">Список игроков команды</p>
     </header>
 
     <div class="controls">
@@ -629,7 +628,7 @@
         </thead>
         <tbody id="playerList"></tbody>
       </table>
-      <div id="emptyMessage" class="empty">Подключение к Firebase...</div>
+      <div id="emptyMessage" class="empty">Загрузка...</div>
     </div>
 
     <div class="save-section">
@@ -744,7 +743,7 @@
         activePeriodId = null;
         return;
       }
-      clubTitleValue = data.clubTitle || "⚽ Футбольный клуб Шуани";
+      clubTitleValue = data.clubTitle || "⚽";
       statusTitle = data.statusTitle || "";
       colCount = clampCols(data.colCount);
       colTitles = normTitles(data.colTitles);
